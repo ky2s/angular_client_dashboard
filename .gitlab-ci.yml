@@ -1,0 +1,92 @@
+stages:
+  - build
+  - deploy
+
+build_hotfix:
+  stage: build
+  image: node:18.12.1
+  only:
+    - hotfix
+  environment:
+    name: hotfix
+  cache:
+    key:
+      prefix: 'hotfix'
+      files:
+        - 'package-lock.json'
+    paths:
+      - 'node_modules'
+  before_script:
+    - 'npm ci'
+  script:
+    - cp $env $CI_PROJECT_DIR/src/environments/environment.development.ts
+    - 'npm run build'
+  artifacts:
+    name: 'hotfix-${CI_COMMIT_SHORT_SHA}'
+    paths:
+      - 'dist'
+
+deploy_hotfix:
+  image: alpine
+  only:
+    - hotfix
+  stage: deploy
+  environment:
+    name: hotfix
+    url: $CI_ENVIRONMENT_URL
+  script:
+    - apk --no-cache add curl git openssh-client
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod -R 700 ~/.ssh
+    - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    # ssh ke server tujuan  
+    - ssh -p$SSH_PORT $SSH_USER@$SSH_HOST "rm -rf ${DEPLOY_DIR}dist"
+    # copy file dri dist/snapin ke public folder web 
+    - scp -P$SSH_PORT -r ./dist/snapin $SSH_USER@$SSH_HOST:${DEPLOY_DIR}
+
+
+build_production:
+  stage: build
+  image: node:18.12.1
+  only:
+    - main
+  environment:
+    name: production
+  cache:
+    key:
+      prefix: 'production'
+      files:
+        - 'package-lock.json'
+    paths:
+      - 'node_modules'
+  before_script:
+    - 'npm ci'
+  script:
+    - cp $env $CI_PROJECT_DIR/src/environments/environment.development.ts
+    - 'npm run build'
+  artifacts:
+    name: 'production-${CI_COMMIT_SHORT_SHA}'
+    paths:
+      - 'dist'
+
+deploy_production:
+  image: alpine
+  only:
+    - main
+  stage: deploy
+  environment:
+    name: production
+    url: $CI_ENVIRONMENT_URL
+  script:
+    - apk --no-cache add curl git openssh-client
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod -R 700 ~/.ssh
+    - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    # ssh ke server tujuan  
+    - ssh -p$SSH_PORT $SSH_USER@$SSH_HOST "rm -rf ${DEPLOY_DIR}dist"
+    # copy file dri dist/snapin ke public folder web 
+    - scp -P$SSH_PORT -r ./dist/snapin $SSH_USER@$SSH_HOST:${DEPLOY_DIR}
