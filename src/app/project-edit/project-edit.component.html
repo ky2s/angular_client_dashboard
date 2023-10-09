@@ -1,0 +1,13 @@
+<h1>{{title}}</h1>
+<form>
+    <div class="mb-3">
+        <label class="form-label">Project Name</label>
+        <input type="email" class="form-control" value="{{projectName}}" name="name" [(ngModel)]="project.name">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea class="form-control" value="{{projectDesc}}" name="description" [(ngModel)]="project.description"></textarea>
+    </div>
+    
+    <button type="submit" class="btn btn-red-snapin" (click)="edit(project)">Save</button>
+</form>

@@ -1,0 +1,10 @@
+/* You can add global styles to this file, and also import other style files */
+.btn.btn-red-snapin{
+    color: #ffffff !important;
+    background-color: #C42E00 !important;
+    border-color: #C42E00 !important;
+}
+
+.bg-red-snapin{
+    background-color: #C42E00 !important;
+}
